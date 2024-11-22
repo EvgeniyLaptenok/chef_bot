@@ -7,8 +7,6 @@ from aiogram.types import Message
 from dotenv import load_dotenv
 import os
 
-from config import TOKEN
-
 load_dotenv()
 bot = Bot(os.getenv('TOKEN'))
 dp = Dispatcher()
