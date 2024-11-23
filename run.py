@@ -4,11 +4,9 @@ from aiogram import Bot, Dispatcher
 from aiogram.filters import CommandStart
 from aiogram.types import Message
 
-from dotenv import load_dotenv
-import os
+from config import TOKEN
 
-load_dotenv()
-bot = Bot(os.getenv('TOKEN'))
+bot = Bot(TOKEN)
 dp = Dispatcher()
 
 @dp.message(CommandStart())
