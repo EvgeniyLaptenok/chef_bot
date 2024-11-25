@@ -4,6 +4,8 @@ from aiogram.types import Message
 
 import keyboards as kb
 
+from xxx import all_name_recept
+
 router = Router()
 
 @router.message(CommandStart())
@@ -15,3 +17,7 @@ async def start(message: Message):
 async def input_recept(message: Message):
     await message.answer('Введи название рецепта')
 
+@router.message()
+async def search_recept(message: Message):
+    name_recept: str = message.text
+    await message.answer(f'{all_name_recept}')
