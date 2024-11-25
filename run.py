@@ -1,21 +1,16 @@
 import asyncio
 
 from aiogram import Bot, Dispatcher
-from aiogram.filters import CommandStart
-from aiogram.types import Message
-
-import keyboards as kb
 
 from config import TOKEN
+
+from handlers import router
 
 bot = Bot(TOKEN)
 dp = Dispatcher()
 
-@dp.message(CommandStart())
-async def start(message: Message):
-    await message.answer('Привет шеф! Нажми на кнопку "Поиск рецепта"', reply_markup=kb.start_bt)
-
 async def main():
+    dp.include_router(router)
     await dp.start_polling(bot)
 
 if __name__ == '__main__':

@@ -1,3 +1,4 @@
-from aiogram.types import (KeyboardButton, ReplyKeyboardMarkup)
+from aiogram.types import (KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove)
 
-start_bt = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='/start')]], resize_keyboard=True) 
+search_bt = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Поиск рецепта')]], 
+                                resize_keyboard=True, one_time_keyboard=True)
