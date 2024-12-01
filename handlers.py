@@ -24,7 +24,14 @@ async def input_recept(message: Message):
 @router.message()
 async def search_recept(message: Message):
     recipe_name = message.text
-    url = f"https://api.spoonacular.com/recipes/complexSearch?query={recipe_name}&number=1&apiKey={API}"
+    url = f'https://api.spoonacular.com/recipes/complexSearch?query={recipe_name}&number=1&apiKey={API}'
     response = requests.get(url)
     data = response.json()
-    await message.answer(f'{data}')
+    if data['results']:
+        recipe_id = data['results'][0]['id']
+        recipe_data = requests.get(f'https://api.spoonacular.com/recipes/{recipe_id}/information', 
+                                   params={'apiKey': API}).json()
+        recipe_title = recipe_data['title']
+        recipe_info = recipe_data['instructions']
+        recipe_img = recipe_data['image']
+        await message.answer(f'Название:\n{recipe_title}\nИнструкция:\n{recipe_info}\n{recipe_img}')
