@@ -2,9 +2,13 @@ from aiogram import Router, F
 from aiogram.filters import CommandStart
 from aiogram.types import Message
 
+import requests
+
+from config import API
+
 import keyboards as kb
 
-from xxx import all_name_recept
+# from xxx import recipe_info
 
 router = Router()
 
@@ -19,5 +23,8 @@ async def input_recept(message: Message):
 
 @router.message()
 async def search_recept(message: Message):
-    name_recept: str = message.text
-    await message.answer(f'{all_name_recept}')
+    recipe_name = message.text
+    url = f"https://api.spoonacular.com/recipes/complexSearch?query={recipe_name}&number=1&apiKey={API}"
+    response = requests.get(url)
+    data = response.json()
+    await message.answer(f'{data}')
