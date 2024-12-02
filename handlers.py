@@ -34,4 +34,16 @@ async def search_recept(message: Message):
         recipe_title = recipe_data['title']
         recipe_info = recipe_data['instructions']
         recipe_img = recipe_data['image']
-        await message.answer(f'Название:\n{recipe_title}\nИнструкция:\n{recipe_info}\n{recipe_img}')
+        ingredients = recipe_data['extendedIngredients']
+        ingredients_list = ', '.join([ingredient['name'] for ingredient in ingredients])
+        count_recipe = data['totalResults']
+
+        await message.answer(f'Название:\n{recipe_title}\n{ingredients_list}\nИнструкция:\n{recipe_info}\n{recipe_img}\n{count_recipe}',
+                             reply_markup=kb.next_bt)
+    else:
+        await message.answer('рецепт не найден')
+
+# @router.message(F.text == 'Ещё рецепт')
+# async def recipe_next(message: Message):
+    
+#     await message.answer('')

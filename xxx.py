@@ -1,8 +1,18 @@
-from config import API
+data = {
+    'result': [
+        {
+            'id': 5
+        },
 
-import requests
+        {
+            'id': 2
+        },
 
+        {
+            'id': 0
+        }
+    ]
+}
 
-
-
-
+for i in data['result']:
+    print(i['id'])
