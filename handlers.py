@@ -1,47 +1,94 @@
 from aiogram import Router, F
 from aiogram.filters import CommandStart
 from aiogram.types import Message
-
-import requests
-
-from config import API
+from googletrans import Translator
 
 import keyboards as kb
+from xxx import *
 
-# from xxx import recipe_info
+translator = Translator()
 
 router = Router()
 
 @router.message(CommandStart())
 async def start(message: Message):
-    await message.answer(f'Привет, шеф {message.from_user.first_name}! Нажми на кнопку "Поиск рецепта"', 
-                         reply_markup=kb.search_bt)
+    await message.answer(
+        f'Привет, шеф {message.from_user.first_name}! Нажми на кнопку "Поиск рецепта"', 
+        reply_markup=kb.search_bt
+    )
 
 @router.message(F.text == 'Поиск рецепта')
-async def input_recept(message: Message):
+async def input_recipe(message: Message):
     await message.answer('Введи название рецепта')
 
 @router.message()
-async def search_recept(message: Message):
+async def search_recipe(message: Message):
     recipe_name = message.text
-    url = f'https://api.spoonacular.com/recipes/complexSearch?query={recipe_name}&number=1&apiKey={API}'
-    response = requests.get(url)
-    data = response.json()
-    if data['results']:
-        recipe_id = data['results'][0]['id']
-        recipe_data = requests.get(f'https://api.spoonacular.com/recipes/{recipe_id}/information', 
-                                   params={'apiKey': API}).json()
-        recipe_title = recipe_data['title']
-        recipe_info = recipe_data['instructions']
-        recipe_img = recipe_data['image']
-        ingredients = recipe_data['extendedIngredients']
-        ingredients_list = ', '.join([ingredient['name'] for ingredient in ingredients])
-        count_recipe = data['totalResults']
+    recipes_data = await get_list_recipes(recipe_name)
+    for result in recipes_data['results']:
+        recipe = await get_detail_recipe(result['id'])
+        # recipes.append(Recipe.from_respons_api(recipe, recipes_data))
+        resipes = Recipe.from_respons_api(recipe, recipes_data)
+    print(resipes.display_recipe_ru())
 
-        await message.answer(f'Название:\n{recipe_title}\n{ingredients_list}\nИнструкция:\n{recipe_info}\n{recipe_img}\n{count_recipe}',
-                             reply_markup=kb.next_bt)
-    else:
-        await message.answer('рецепт не найден')
+    
+   
+    
+    
+    
+    
+    # def clean_html(html_text):
+    #     soup = BeautifulSoup(html_text, 'html.parser')
+    #     return soup.get_text()
+    # class Recipe():
+    #     def __init__(self, title, ingredients_list, info, img, count):
+    #         self.title = title
+    #         self.ingredients_list = ingredients_list
+    #         self.info = info
+    #         self.img = img
+    #         self.count = count
+
+    #     async def recipe_print(self):
+    #         await message.answer(
+    #             (
+    #                 f'Названиe:\n{self.title}\n'
+    #                 f'Ингредиенты:\n{self.ingredients_list}\n'
+    #                 f'Инструкция:\n{self.info}\n'
+    #                 f'{self.img}\n'
+    #                 f'{self.count}'
+    #             ),
+    #             reply_markup=kb.next_bt
+    #         )
+
+    # class RecipeApi():
+    #     def __init__(self, url):
+    #         self.url = url
+        
+    #     def get_recipe(self):
+    #         response = requests.get(f'{self.url}/recipes/complexSearch?query={recipe_name}&number=1&apiKey={API}')
+    #         data = response.json()
+
+    #         if data['results']:
+    #             recipe_id = data['results'][0]['id']
+    #             recipe_data = requests.get(
+    #                 f'{self.url}/recipes/{recipe_id}/information', 
+    #                     params={'apiKey': API}
+    #             ).json()
+    #             ingredients = recipe_data['extendedIngredients']
+
+    #             return Recipe(
+    #                 title = recipe_data['title'],
+    #                 ingredients_list = ', '.join([ingredient['name'] for ingredient in ingredients]),
+    #                 info = clean_html(recipe_data['instructions']),
+    #                 img = recipe_data['image'],
+    #                 count = data['totalResults']
+    #             )
+            
+    # url = f'https://api.spoonacular.com'
+
+    # api_recipe = RecipeApi(url)
+    # recipe = api_recipe.get_recipe()
+    # recipe.recipe_print()
 
 # @router.message(F.text == 'Ещё рецепт')
 # async def recipe_next(message: Message):
