@@ -24,12 +24,9 @@ async def input_recipe(message: Message):
 @router.message()
 async def search_recipe(message: Message):
     recipe_name = message.text
-    recipes_data = await get_list_recipes(recipe_name)
-    for result in recipes_data['results']:
-        recipe = await get_detail_recipe(result['id'])
-        # recipes.append(Recipe.from_respons_api(recipe, recipes_data))
-        resipes = Recipe.from_respons_api(recipe, recipes_data)
-    print(resipes.display_recipe_ru())
+    recipes_data = get_list_recipes(recipe_name)
+    recipe = Recipe(recipes_data['results'][0]['id'])
+    
 
     
    

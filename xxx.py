@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from googletrans import Translator
+import asyncio
 
 from config import API
 
@@ -32,7 +33,7 @@ class Recipe():
     
     def display_recipe_ru(self):
         title_translate = translator.translate(self.title, src='en', dest='ru').text
-        ingredients_numerate = '\n'.join(f'{i + 1}. {ingredient}' for i, ingredient in enumerate(self.ingredients))
+        ingredients_numerate = '\t\n'.join(f'{num}. {ingredient}' for num, ingredient in enumerate(self.ingredients, 1))
         ingredients_translate = translator.translate(ingredients_numerate, src='en', dest='ru').text
         info_translate = translator.translate(self.info, src='en', dest='ru').text
         return (
@@ -43,20 +44,43 @@ class Recipe():
             f'Найдено рецептов: {self.count}'
         )
 
-async def get_list_recipes(recipe_name):
-    response = requests.get(f'https://api.spoonacular.com/recipes/complexSearch?query={recipe_name}&number=1&apiKey={API}')
-    return response.json()
 
-async def get_detail_recipe(recipe_id):
-    response = requests.get(
-        f'https://api.spoonacular.com/recipes/{recipe_id}/information', 
-        params={'apiKey': API}
-    )
-    return response.json()
+class Recipe:
+    def __init__(self, recipe_id: int) -> None:
+        recept = self.getRecipeInDB(recipe_id)
+        if not recept:
+            recept = self.getRecipeInAPI(recipe_id)
+        
+        self.name = recept['name']
+        self.id = recipe_id
+        
+        
+    def getRecipeInDB(self, recipe_id) -> dict | None:
+        pass
+        
+        
+    def getRecipeInAPI(self, recipe_id) -> dict | None:
+        pass
+        
 
 
+async def request_spoonacular(query: str, params: dict={}) -> dict:
+    return requests.get(query, params=params, timeout=5).json()
 
 
+def get_detail_recipe(recipe_id):
+    
+    link = f'https://api.spoonacular.com/recipes{recipe_id}/information'
+    params={'apiKey': API}
+    
+    return asyncio.run(request_spoonacular(query=link, params=params))
+    
 
-
-
+def get_list_recipes(recipe_name):
+    
+    link = 'https://api.spoonacular.com/recipes/complexSearch'
+    params = {
+        'query': recipe_name,
+        'apiKey': API
+    }
+    return asyncio.run(request_spoonacular(query=link, params=params))
