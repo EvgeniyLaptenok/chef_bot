@@ -24,73 +24,7 @@ async def input_recipe(message: Message):
 @router.message()
 async def search_recipe(message: Message):
     recipe_name = message.text
-    recipes_data = await get_list_recipes(recipe_name)
-    for result in recipes_data['results']:
-        recipe = await get_detail_recipe(result['id'])
-        # recipes.append(Recipe.from_respons_api(recipe, recipes_data))
-        resipes = Recipe.from_respons_api(recipe, recipes_data)
-    print(resipes.display_recipe_ru())
+    user_id = message.from_user.id
+    chat_id = message.chat.id
 
     
-   
-    
-    
-    
-    
-    # def clean_html(html_text):
-    #     soup = BeautifulSoup(html_text, 'html.parser')
-    #     return soup.get_text()
-    # class Recipe():
-    #     def __init__(self, title, ingredients_list, info, img, count):
-    #         self.title = title
-    #         self.ingredients_list = ingredients_list
-    #         self.info = info
-    #         self.img = img
-    #         self.count = count
-
-    #     async def recipe_print(self):
-    #         await message.answer(
-    #             (
-    #                 f'Названиe:\n{self.title}\n'
-    #                 f'Ингредиенты:\n{self.ingredients_list}\n'
-    #                 f'Инструкция:\n{self.info}\n'
-    #                 f'{self.img}\n'
-    #                 f'{self.count}'
-    #             ),
-    #             reply_markup=kb.next_bt
-    #         )
-
-    # class RecipeApi():
-    #     def __init__(self, url):
-    #         self.url = url
-        
-    #     def get_recipe(self):
-    #         response = requests.get(f'{self.url}/recipes/complexSearch?query={recipe_name}&number=1&apiKey={API}')
-    #         data = response.json()
-
-    #         if data['results']:
-    #             recipe_id = data['results'][0]['id']
-    #             recipe_data = requests.get(
-    #                 f'{self.url}/recipes/{recipe_id}/information', 
-    #                     params={'apiKey': API}
-    #             ).json()
-    #             ingredients = recipe_data['extendedIngredients']
-
-    #             return Recipe(
-    #                 title = recipe_data['title'],
-    #                 ingredients_list = ', '.join([ingredient['name'] for ingredient in ingredients]),
-    #                 info = clean_html(recipe_data['instructions']),
-    #                 img = recipe_data['image'],
-    #                 count = data['totalResults']
-    #             )
-            
-    # url = f'https://api.spoonacular.com'
-
-    # api_recipe = RecipeApi(url)
-    # recipe = api_recipe.get_recipe()
-    # recipe.recipe_print()
-
-# @router.message(F.text == 'Ещё рецепт')
-# async def recipe_next(message: Message):
-    
-#     await message.answer('')
