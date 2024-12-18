@@ -3,7 +3,7 @@ import asyncio
 from bs4 import BeautifulSoup
 from googletrans import Translator
 
-from config import API_RECIPES
+from keys.config import API_RECIPES
 
 translator = Translator()
 class Recipe:
