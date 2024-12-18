@@ -1,73 +1,161 @@
 import requests
 import asyncio
 from bs4 import BeautifulSoup
-from googletrans import Translator
+from googletrans import Translator as gt
 
 from keys.config import API_RECIPES
 
-translator = Translator()
+
+class Translator:
+    """Класс для работы с переводчиком"""
+    
+    def __init__(self):
+        self.translator =  gt()
+    
+    def getTrans(self, text: str, old_lang: str, new_lang: str) -> str:
+        return (
+            self.translator
+            .translate(
+                text,
+                src=old_lang,
+                dest=new_lang
+            )
+            .text
+        )
+    
+    def getRusText(self, text: str) -> str:
+        return self.getTrans(text=text, old_lang='en', new_lang='ru')
+    
+    def getEnText(self, text: str) -> str:
+        return self.getTrans(text=text, old_lang='ru', new_lang='en')
+
+
+class DB:
+    def __init__(self):
+        ...
+    
+    def query(self, query_text: str):
+        ...
+    
+    def save_recipie(self, recipe: dict) -> None:
+        ...
+    
+    def get_recipie(self, recipe_id: int) -> dict | None:
+        return None
+        
+    def save_buffer(self, chat_id: int, user_id: int, recipes_id: list) -> None:
+        ...
+        
+    def get_count_recipes(self, chat_id: int, user_id: int) -> int:
+        ...
+    
+    def drop_recipe_in_buffer(self, chat_id: int, user_id: int, recipe_id: int) -> None:
+        ...
+        
+class Spoonacular:
+    """Класс для работы с Spoonacular api"""
+    
+    def __init__(self, translator):
+        self.translator = translator
+    
+    def query(self, query_text: str, query_params: dict, timeout: int = 5) -> dict:
+        return requests.get(
+            query_text,
+            params=query_params,
+            timeout=timeout
+        ).json()
+        
+    def get_list_recipes(self, recipe_name: str) -> list:
+        """Получает рецепы по названию"""
+
+        link = 'https://api.spoonacular.com/recipes/complexSearch'
+        params = {
+            'query': self.translator.getEnText(recipe_name),
+            'apiKey': API_RECIPES
+        }
+        return self.query(query_text=link, query_params=params)['results']
+    
+    def get_detail_recipe(self, recipe_id):
+        """Получает рецепт по id"""
+
+        link = f'https://api.spoonacular.com/recipes/{recipe_id}/information'
+        params = {'apiKey': API_RECIPES}
+        
+        return self.query(query_text=link, query_params=params)
+    
+    
 class Recipe:
-    def __init__(self, recipe_id: int) -> None:
-        recipe = self.get_recipe_in_DB(recipe_id)
-        if not recipe:
-            recipe = self.get_recipe_in_API(recipe_id)
+    """Класс рецепта"""
+    
+    def __init__(self,
+                 recipe_id: int,
+                 translator: Translator,
+                 spoonacular: Spoonacular,
+                 db: DB,
+                 ) -> None:
+        self.translator = translator
+        self.spoonacular = spoonacular
+        self.db = db
+        
+        recipe = self.get_recipe(recipe_id=recipe_id)
         
         self.id = recipe_id
         self.name = recipe['title']
-        self.instructions = clean_html(recipe['instructions'])
-        self.ingredients = [ingredient['name'] for ingredient in recipe['extendedIngredients']]
+        self.instructions = recipe['instructions']
+        self.ingredients = recipe['ingredients']
         self.img = recipe['image']
-      
+    
+    def get_recipe(self, recipe_id: int) -> dict:
+        
+        recipe = self.get_recipe_in_DB(recipe_id=recipe_id)
+        if not recipe:
+            recipe = self.get_recipe_in_API(recipe_id=recipe_id)
+        
+        recipe['title'] = self.translator.getRusText(recipe['title'])
+        recipe['instructions'] = self.translator.getRusText(
+            self.clean_html(recipe['instructions'])
+        )
+        recipe['ingredients'] = ', '.join([
+            self.translator.getRusText(ingredient['name'])
+            for ingredient in recipe['extendedIngredients']
+        ])
+        
+        return recipe
+        
     def get_recipe_in_DB(self, recipe_id) -> dict | None:
         """Получает рецепт из БД"""
-        pass
-    
-
-    def get_recipe_in_API(self, recipe_id) -> dict | None:
+        
+        return self.db.get_recipie(recipe_id=recipe_id)
+        
+    def get_recipe_in_API(self, recipe_id: int) -> dict | None:
         """Получает рецепт из api"""
         
-        return get_detail_recipe(recipe_id)
-    
-
+        return self.spoonacular.get_detail_recipe(recipe_id)
       
-def clean_html(html_text):
-    """Очищает текст от тегов"""
+    def clean_html(self, html_text: str):
+        """Очищает текст от тегов"""
 
-    soup = BeautifulSoup(html_text, 'html.parser')
-    return soup.get_text()        
+        soup = BeautifulSoup(html_text, 'html.parser')
+        return soup.get_text()
 
-
-async def request_spoonacular(query: str, params: dict={}) -> dict:
-    """Возращает рецепты в json"""
-
-    return requests.get(query, params=params, timeout=5).json()
-
-
-def get_detail_recipe(recipe_id):
-    """Получает рецепт по id"""
-
-    link = f'https://api.spoonacular.com/recipes/{recipe_id}/information'
-    params = {'apiKey': API_RECIPES}
-    
-    return asyncio.run(request_spoonacular(query=link, params=params))
-
-
-def get_list_recipes(recipe_name):
-    """Получает рецепы по названию"""
-
-    link = 'https://api.spoonacular.com/recipes/complexSearch'
-    params = {
-        'query': recipe_name,
-        'apiKey': API_RECIPES
-    }
-    return asyncio.run(request_spoonacular(query=link, params=params))
-
-
-def get_recipe_id(recipe_name):
-    recipe_list = get_list_recipes(recipe_name)
-    for recipe in recipe_list['results']:
-        return Recipe(recipe_id=recipe['id'])
-
-
-
-
+    def get_text_message_recipe(self) -> str:
+        return (
+            f'Названиe:\n{self.name}\n\n'
+            f'Ингредиенты:\n{self.ingredients}\n\n'
+            f'Инструкция:\n{self.instructions}\n\n'
+            f'{self.img}\n'
+        )
+        
+        
+if __name__ == '__main__':
+    my_trans = Translator()
+    my_db = DB()
+    my_spoonacular = Spoonacular(my_trans)
+    recipie_id = my_spoonacular.get_list_recipes('пицца')[0]['id']
+    my_recipe = Recipe(
+        recipe_id=recipie_id,
+        translator=my_trans,
+        spoonacular=my_spoonacular,
+        db=my_db,
+    )
+    print(my_recipe.get_text_message_recipe())
