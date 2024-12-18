@@ -1,5 +1,5 @@
-import requests
 import asyncio
+import aiohttp
 from bs4 import BeautifulSoup
 from googletrans import Translator as gt
 
@@ -75,33 +75,34 @@ class Spoonacular:
     
     def __init__(self, translator):
         self.translator = translator
-    
-    def query(self, query_text: str, query_params: dict, timeout: int = 5) -> dict:
+        self.spoonacular_link = 'https://api.spoonacular.com/recipes'
+        
+    async def query(self, query_text: str, query_params: dict, timeout: int = 5) -> dict:
         """Запрос в API Spoonacular"""
         
-        return requests.get(
-            query_text,
-            params=query_params,
-            timeout=timeout
-        ).json()
+        async with aiohttp.ClientSession() as session:
+            async with session.get(query_text, params=query_params) as resp:
+                response = await resp.json()
+                
+        return response 
         
     def get_list_recipes(self, recipe_name: str) -> list:
         """Получает рецепы по названию"""
 
-        link = 'https://api.spoonacular.com/recipes/complexSearch'
+        link = f'{self.spoonacular_link}/complexSearch'
         params = {
             'query': self.translator.getEnText(recipe_name),
             'apiKey': API_RECIPES
         }
-        return self.query(query_text=link, query_params=params)['results']
+        return asyncio.run(self.query(query_text=link, query_params=params))['results']
     
     def get_detail_recipe(self, recipe_id):
         """Получает рецепт по id"""
 
-        link = f'https://api.spoonacular.com/recipes/{recipe_id}/information'
+        link = f'{self.spoonacular_link}/{recipe_id}/information'
         params = {'apiKey': API_RECIPES}
         
-        return self.query(query_text=link, query_params=params)
+        return asyncio.run(self.query(query_text=link, query_params=params))
 
 
 class Recipe:
