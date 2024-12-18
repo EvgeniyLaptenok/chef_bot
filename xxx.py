@@ -64,6 +64,12 @@ class DB:
         
         ...
         
+    def drop_user_buffer(self, chat_id: int, user_id: int) -> None:
+        """Удаляет буффер по пользователю"""
+        
+        ...
+        
+
 class Spoonacular:
     """Класс для работы с Spoonacular api"""
     
@@ -96,8 +102,8 @@ class Spoonacular:
         params = {'apiKey': API_RECIPES}
         
         return self.query(query_text=link, query_params=params)
-    
-    
+
+
 class Recipe:
     """Класс рецепта"""
     
@@ -162,8 +168,8 @@ class Recipe:
             f'Инструкция:\n{self.instructions}\n\n'
             f'{self.img}\n'
         )
-        
-        
+
+
 if __name__ == '__main__':
     my_trans = Translator()
     my_db = DB()
