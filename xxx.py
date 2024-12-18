@@ -165,17 +165,27 @@ class Recipe:
         
         return (
             f'Названиe:\n{self.name}\n\n'
-            f'Ингредиенты:\n{self.ingredients}\n\n'
+            f'Ингредиенты:\n{self.ingredients.capitalize()}\n\n'
             f'Инструкция:\n{self.instructions}\n\n'
             f'{self.img}\n'
         )
 
 
 if __name__ == '__main__':
+    pecipe_name = 'Борщ'
     my_trans = Translator()
     my_db = DB()
     my_spoonacular = Spoonacular(my_trans)
-    recipie_id = my_spoonacular.get_list_recipes('пицца')[0]['id']
+    recipes = my_spoonacular.get_list_recipes(pecipe_name)
+    
+    if len(recipes) == 0:
+        raise('Не нашлось рецептов')
+    elif len(recipes) == 1:
+        recipie_id = recipes[0]['id']
+    else:
+        my_db.save_buffer(chat_id=-1, user_id=-1, recipes_id=[recipe['id'] for recipe in recipes])
+        recipie_id = recipes[0]['id']
+        
     my_recipe = Recipe(
         recipe_id=recipie_id,
         translator=my_trans,
