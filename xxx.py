@@ -35,21 +35,33 @@ class DB:
         ...
     
     def query(self, query_text: str):
+        """Запрос в БД"""
+        
         ...
     
     def save_recipie(self, recipe: dict) -> None:
+        """Сохраняет рецепт в БД"""
+        
         ...
     
     def get_recipie(self, recipe_id: int) -> dict | None:
+        """Достает рецепт из БД"""
+        
         return None
         
     def save_buffer(self, chat_id: int, user_id: int, recipes_id: list) -> None:
+        """Сохраняет инфу о рецептах в буффер"""
+        
         ...
         
     def get_count_recipes(self, chat_id: int, user_id: int) -> int:
+        """Достает количество оставшихся рецептов из буффера"""
+        
         ...
     
     def drop_recipe_in_buffer(self, chat_id: int, user_id: int, recipe_id: int) -> None:
+        """Удаляет рецепт из буффера"""
+        
         ...
         
 class Spoonacular:
@@ -59,6 +71,8 @@ class Spoonacular:
         self.translator = translator
     
     def query(self, query_text: str, query_params: dict, timeout: int = 5) -> dict:
+        """Запрос в API Spoonacular"""
+        
         return requests.get(
             query_text,
             params=query_params,
@@ -106,6 +120,7 @@ class Recipe:
         self.img = recipe['image']
     
     def get_recipe(self, recipe_id: int) -> dict:
+        """Достает рецепт"""
         
         recipe = self.get_recipe_in_DB(recipe_id=recipe_id)
         if not recipe:
@@ -139,6 +154,8 @@ class Recipe:
         return soup.get_text()
 
     def get_text_message_recipe(self) -> str:
+        """Формирует сообщение рецепта"""
+        
         return (
             f'Названиe:\n{self.name}\n\n'
             f'Ингредиенты:\n{self.ingredients}\n\n'
