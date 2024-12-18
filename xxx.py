@@ -16,16 +16,16 @@ class Recipe:
         self.name = recipe['title']
         self.instructions = clean_html(recipe['instructions'])
         self.ingredients = [ingredient['name'] for ingredient in recipe['extendedIngredients']]
+        self.img = recipe['image']
       
     def get_recipe_in_DB(self, recipe_id) -> dict | None:
         """Получает рецепт из БД"""
-        
-        
+        pass
     
 
     def get_recipe_in_API(self, recipe_id) -> dict | None:
         """Получает рецепт из api"""
-
+        
         return get_detail_recipe(recipe_id)
     
 
@@ -46,7 +46,7 @@ async def request_spoonacular(query: str, params: dict={}) -> dict:
 def get_detail_recipe(recipe_id):
     """Получает рецепт по id"""
 
-    link = f'https://api.spoonacular.com/recipes{recipe_id}/information'
+    link = f'https://api.spoonacular.com/recipes/{recipe_id}/information'
     params = {'apiKey': API_RECIPES}
     
     return asyncio.run(request_spoonacular(query=link, params=params))
@@ -63,8 +63,10 @@ def get_list_recipes(recipe_name):
     return asyncio.run(request_spoonacular(query=link, params=params))
 
 
-
-
+def get_recipe_id(recipe_name):
+    recipe_list = get_list_recipes(recipe_name)
+    for recipe in recipe_list['results']:
+        return Recipe(recipe_id=recipe['id'])
 
 
 

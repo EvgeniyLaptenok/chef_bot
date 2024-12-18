@@ -57,13 +57,16 @@ class BufferRecipe:
     
     def save_info_user (self) -> None:
         """Сохраняет инфу о пользователе в базе данных"""
-        
+
         insert_query = '''
             INSERT INTO buffer_recipe (chat_id, user_id, recipe_id)
             VALUES (%s, %s, %s)
         '''
-        
+        my_db.cursor.execute(insert_query, (self.chat_id, self.user_id, self.recipe_id))
+        my_db.connection.commit()
+
     def del_info_user(self):
+        """"""
+        pass
 
     
-buffer = BufferRecipe()

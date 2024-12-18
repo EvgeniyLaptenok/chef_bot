@@ -5,6 +5,7 @@ from googletrans import Translator
 
 import keyboards as kb
 from xxx import *
+from database import *
 
 translator = Translator()
 
@@ -26,5 +27,8 @@ async def search_recipe(message: Message):
     recipe_name = message.text
     user_id = message.from_user.id
     chat_id = message.chat.id
+    get_recipe_id(recipe_name)
+       
+    
 
     
