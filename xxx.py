@@ -164,8 +164,8 @@ class Recipe:
         """Формирует сообщение рецепта"""
         
         return (
-            f'Названиe:\n{self.name}\n\n'
-            f'Ингредиенты:\n{self.ingredients.capitalize()}\n\n'
+            f'Названиe: {self.name}\n\n'
+            f'Ингредиенты: {self.ingredients.capitalize()}\n\n'
             f'Инструкция:\n{self.instructions}\n\n'
             f'{self.img}\n'
         )
