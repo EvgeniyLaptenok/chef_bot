@@ -1,6 +1,0 @@
-TOKEN_BOT='8175096357:AAFnDDzuhjnnfVBkBzjRUIE_Vg6corMUYa4'
-API_RECIPES = '38fb21d5f2e3468fb603814578dccbfc'
-USER_DB = 'eslaptenok'
-PASSWORD_DB = '1q2w3e4r'
-
-    
