@@ -120,7 +120,7 @@ class Recipe:
         
         recipe = self.get_recipe(recipe_id=recipe_id)
         
-        self.id = recipe_id
+        self.id = recipe['id']
         self.name = recipe['title']
         self.instructions = recipe['instructions']
         self.ingredients = recipe['ingredients']
