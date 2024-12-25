@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from googletrans import Translator as gt
 
 from keys.config import API_RECIPES
+from database import *
 
 
 class Translator:
@@ -32,48 +33,70 @@ class Translator:
 
 class DB:
     def __init__(self):
-        ...
+        self.connection = my_db.connection
+        self.cursor = self.connection.cursor()
     
     def query(self, query_text: str):
         """Запрос в БД"""
-        
-        ...
+
+        self.cursor.execute(query_text)  
+        return self.cursor.fetchall()
     
     def save_recipie(self, recipe: dict) -> None:
         """Сохраняет рецепт в БД"""
         
-        ...
+        query = '''
+            INSERT INTO recipes (id, title, ingredients, instructions) VALUES (%s, %s, %s, %s, %s)
+        '''
+        self.cursor.execute(
+            query, (
+                recipe['id'], 
+                recipe['title'], 
+                recipe['ingredients'], 
+                recipe['instructions'], 
+                recipe['image']
+            )
+        )
+        self.connection.commit()
     
-    def get_recipie(self, recipe_id: int) -> dict | None:
+    def get_recipe(self, recipe_id: int) -> dict | None:
         """Достает рецепт из БД"""
         
+        query = '''SELECT * FROM recipes WHERE id = %s'''
+        result = self.query(query, (recipe_id))  
         return None
         
     def save_buffer(self, chat_id: int, user_id: int, recipes_id: list) -> None:
         """Сохраняет инфу о рецептах в буффер"""
         
-        ...
+        query = '''INSERT INTO buffer (chat_id, user_id, recipes_id) VALUES (%s, %s, %s)'''
+        self.cursor.execute(query, (chat_id, user_id, recipes_id)) 
+        self.connection.commit()
         
     def get_count_recipes(self, chat_id: int, user_id: int) -> int:
         """Достает количество оставшихся рецептов из буффера"""
         
-        ...
+        query = '''SELECT COUNT(1) FROM buffer WHERE chat_id = %s AND user_id = %s'''
+        result = self.query(query, (chat_id, user_id))  
+        return ...
     
     def drop_recipe_in_buffer(self, chat_id: int, user_id: int, recipe_id: int) -> None:
         """Удаляет рецепт из буффера"""
         
-        ...
+        query = '''DELETE FROM buffer WHERE chat_id = %s AND user_id = %s AND recipe_id = %s'''
+        self.cursor.execute(query, (chat_id, user_id, recipe_id))  
+        self.connection.commit()
         
     def drop_user_buffer(self, chat_id: int, user_id: int) -> None:
         """Удаляет буффер по пользователю"""
         
-        ...
+        
         
 
 class Spoonacular:
     """Класс для работы с Spoonacular api"""
     
-    def __init__(self, translator):
+    def __init__(self, translator: Translator):
         self.translator = translator
         self.spoonacular_link = 'https://api.spoonacular.com/recipes'
         
@@ -94,6 +117,7 @@ class Spoonacular:
             'query': self.translator.getEnText(recipe_name),
             'apiKey': API_RECIPES
         }
+
         return asyncio.run(self.query(query_text=link, query_params=params))['results']
     
     def get_detail_recipe(self, recipe_id):
@@ -103,7 +127,7 @@ class Spoonacular:
         params = {'apiKey': API_RECIPES}
         
         return asyncio.run(self.query(query_text=link, query_params=params))
-
+        
 
 class Recipe:
     """Класс рецепта"""
@@ -138,7 +162,7 @@ class Recipe:
             self.clean_html(recipe['instructions'])
         )
         recipe['ingredients'] = ', '.join([
-            self.translator.getRusText(ingredient['name'])
+            self.translator.getRusText(ingredient['name']).capitalize()
             for ingredient in recipe['extendedIngredients']
         ])
         
@@ -165,31 +189,14 @@ class Recipe:
         
         return (
             f'Названиe: {self.name}\n\n'
-            f'Ингредиенты: {self.ingredients.capitalize()}\n\n'
+            f'Ингредиенты: {self.ingredients}\n\n'
             f'Инструкция:\n{self.instructions}\n\n'
             f'{self.img}\n'
         )
 
 
-if __name__ == '__main__':
-    pecipe_name = 'Борщ'
-    my_trans = Translator()
-    my_db = DB()
-    my_spoonacular = Spoonacular(my_trans)
-    recipes = my_spoonacular.get_list_recipes(pecipe_name)
-    
-    if len(recipes) == 0:
-        raise('Не нашлось рецептов')
-    elif len(recipes) == 1:
-        recipie_id = recipes[0]['id']
-    else:
-        my_db.save_buffer(chat_id=-1, user_id=-1, recipes_id=[recipe['id'] for recipe in recipes])
-        recipie_id = recipes[0]['id']
-        
-    my_recipe = Recipe(
-        recipe_id=recipie_id,
-        translator=my_trans,
-        spoonacular=my_spoonacular,
-        db=my_db,
-    )
-    print(my_recipe.get_text_message_recipe())
+my_trans = Translator()
+db = DB()
+my_spoonacular = Spoonacular(my_trans)
+
+
