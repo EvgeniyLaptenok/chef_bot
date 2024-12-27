@@ -49,7 +49,7 @@ class MyDB:
                 id SERIAL PRIMARY KEY,
                 chat_id INTEGER NOT NULL,
                 user_id INTEGER NOT NULL,
-                recipes_id INTEGER[] NOT NULL
+                recipe_id INTEGER NOT NULL
             )
         '''
         self.cursor.execute(table_buffer)

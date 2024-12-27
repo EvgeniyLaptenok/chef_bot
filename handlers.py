@@ -6,8 +6,6 @@ import keyboards as kb
 from xxx import *
 from database import *
 
-translator = Translator()
-
 router = Router()
 
 @router.message(CommandStart())

@@ -42,11 +42,11 @@ class DB:
         self.cursor.execute(query_text)  
         return self.cursor.fetchall()
     
-    def save_recipie(self, recipe: dict) -> None:
+    def save_recipe(self, recipe: dict) -> None:
         """Сохраняет рецепт в БД"""
         
         query = '''
-            INSERT INTO recipes (id, title, ingredients, instructions) VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO recipes (id, title, ingredients, instructions, image) VALUES (%s, %s, %s, %s, %s)
         '''
         self.cursor.execute(
             query, (
@@ -69,8 +69,9 @@ class DB:
     def save_buffer(self, chat_id: int, user_id: int, recipes_id: list) -> None:
         """Сохраняет инфу о рецептах в буффер"""
         
-        query = '''INSERT INTO buffer (chat_id, user_id, recipes_id) VALUES (%s, %s, %s)'''
-        self.cursor.execute(query, (chat_id, user_id, recipes_id)) 
+        query = '''INSERT INTO buffer (chat_id, user_id, recipe_id) VALUES (%s, %s, %s)'''
+        for recipe_id in recipes_id:
+            self.cursor.execute(query, (chat_id, user_id, recipe_id)) 
         self.connection.commit()
         
     def get_count_recipes(self, chat_id: int, user_id: int) -> int:
@@ -90,6 +91,9 @@ class DB:
     def drop_user_buffer(self, chat_id: int, user_id: int) -> None:
         """Удаляет буффер по пользователю"""
         
+        query = '''DELETE FROM buffer WHERE chat_id = %s AND user_id = %s'''
+        self.cursor.execute(query, (chat_id, user_id))  
+        self.connection.commit()
         
         
 
@@ -171,7 +175,7 @@ class Recipe:
     def get_recipe_in_DB(self, recipe_id) -> dict | None:
         """Получает рецепт из БД"""
         
-        return self.db.get_recipie(recipe_id=recipe_id)
+        return self.db.get_recipe(recipe_id=recipe_id)
         
     def get_recipe_in_API(self, recipe_id: int) -> dict | None:
         """Получает рецепт из api"""
