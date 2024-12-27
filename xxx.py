@@ -104,9 +104,9 @@ class Spoonacular:
         
     async def query(self, query_text: str, query_params: dict, timeout: int = 5) -> dict:
         """Запрос в API Spoonacular"""
-        
+
         return requests.get(query_text, params=query_params, timeout=timeout).json()
-                
+
     def get_list_recipes(self, recipe_name: str) -> list:
         """Получает рецепы по названию"""
 
@@ -115,9 +115,9 @@ class Spoonacular:
             'query': self.translator.getEnText(recipe_name),
             'apiKey': API_RECIPES
         }
-        
+
         return self.query(query_text=link, query_params=params)
-    
+
     def get_detail_recipe(self, recipe_id):
         """Получает рецепт по id"""
 
