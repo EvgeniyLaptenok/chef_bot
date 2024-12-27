@@ -59,12 +59,12 @@ class DB:
         )
         self.connection.commit()
     
-    def get_recipe(self, recipe_id: int) -> dict | None:
+    def get_recipe(self, recipe_id: int) -> tuple | None:
         """Достает рецепт из БД"""
         
-        query = '''SELECT * FROM recipes WHERE id = %s'''
+        query = '''SELECT * FROM recipes WHERE recipe_id = %s'''
         result = self.query(query, (recipe_id))  
-        return None
+        return result[0] if result else None
         
     def save_buffer(self, chat_id: int, user_id: int, recipes_id: list) -> None:
         """Сохраняет инфу о рецептах в буффер"""
@@ -79,7 +79,7 @@ class DB:
         
         query = '''SELECT COUNT(1) FROM buffer WHERE chat_id = %s AND user_id = %s'''
         result = self.query(query, (chat_id, user_id))  
-        return ...
+        return result[0][0] if result else 0
     
     def drop_recipe_in_buffer(self, chat_id: int, user_id: int, recipe_id: int) -> None:
         """Удаляет рецепт из буффера"""

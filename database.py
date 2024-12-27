@@ -32,6 +32,7 @@ class MyDB:
         table_recipes = '''
             CREATE TABLE IF NOT EXISTS recipes (
                 id SERIAL PRIMARY KEY,
+                recipe_id INTEGER NOT NULL,
                 title TEXT NOT NULL,
                 ingredients TEXT[] NOT NULL,
                 instructions TEXT NOT NULL,
