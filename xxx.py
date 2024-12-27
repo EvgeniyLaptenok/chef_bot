@@ -46,7 +46,7 @@ class DB:
         """Сохраняет рецепт в БД"""
         
         query = '''
-            INSERT INTO recipes (id, title, ingredients, instructions, image) VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO recipes (recipe_id, title, ingredients, instructions, image) VALUES (%s, %s, %s, %s, %s)
         '''
         self.cursor.execute(
             query, (
@@ -96,7 +96,6 @@ class DB:
         self.connection.commit()
         
         
-
 class Spoonacular:
     """Класс для работы с Spoonacular api"""
     
@@ -121,7 +120,6 @@ class Spoonacular:
             'query': self.translator.getEnText(recipe_name),
             'apiKey': API_RECIPES
         }
-
         return asyncio.run(self.query(query_text=link, query_params=params))['results']
     
     def get_detail_recipe(self, recipe_id):
