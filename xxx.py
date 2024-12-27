@@ -1,5 +1,6 @@
 import asyncio
 import aiohttp
+import requests
 from bs4 import BeautifulSoup
 from googletrans import Translator as gt
 
@@ -62,8 +63,8 @@ class DB:
     def get_recipe(self, recipe_id: int) -> tuple | None:
         """Достает рецепт из БД"""
         
-        query = '''SELECT * FROM recipes WHERE recipe_id = %s'''
-        result = self.query(query, (recipe_id))  
+        query = f'''SELECT * FROM recipes WHERE recipe_id = {recipe_id}'''
+        result = self.query(query)
         return result[0] if result else None
         
     def save_buffer(self, chat_id: int, user_id: int, recipes_id: list) -> None:
@@ -71,7 +72,7 @@ class DB:
         
         query = '''INSERT INTO buffer (chat_id, user_id, recipe_id) VALUES (%s, %s, %s)'''
         for recipe_id in recipes_id:
-            self.cursor.execute(query, (chat_id, user_id, recipe_id)) 
+            self.cursor.execute(query % chat_id % user_id % recipe_id)
         self.connection.commit()
         
     def get_count_recipes(self, chat_id: int, user_id: int) -> int:
@@ -106,12 +107,8 @@ class Spoonacular:
     async def query(self, query_text: str, query_params: dict, timeout: int = 5) -> dict:
         """Запрос в API Spoonacular"""
         
-        async with aiohttp.ClientSession() as session:
-            async with session.get(query_text, params=query_params) as resp:
-                response = await resp.json()
+        return requests.get(query_text, params=query_params, timeout=timeout).json()
                 
-        return response 
-        
     def get_list_recipes(self, recipe_name: str) -> list:
         """Получает рецепы по названию"""
 
@@ -120,7 +117,8 @@ class Spoonacular:
             'query': self.translator.getEnText(recipe_name),
             'apiKey': API_RECIPES
         }
-        return asyncio.run(self.query(query_text=link, query_params=params))['results']
+        
+        return self.query(query_text=link, query_params=params)
     
     def get_detail_recipe(self, recipe_id):
         """Получает рецепт по id"""
@@ -128,7 +126,7 @@ class Spoonacular:
         link = f'{self.spoonacular_link}/{recipe_id}/information'
         params = {'apiKey': API_RECIPES}
         
-        return asyncio.run(self.query(query_text=link, query_params=params))
+        return self.query(query_text=link, query_params=params)
         
 
 class Recipe:

@@ -25,6 +25,7 @@ async def search_recipe(message: Message):
     user_id = message.from_user.id
     chat_id = message.chat.id
     recipes = await my_spoonacular.get_list_recipes(recipe_name)
+    recipes = recipes['results']
 
     if len(recipes) == 0:
         raise('Не нашлось рецептов')
@@ -42,6 +43,3 @@ async def search_recipe(message: Message):
     )
     print(my_recipe.get_text_message_recipe())
 
-    
-
-    
